@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
+import Spinner from "../../components/Spinner";
 
 export default function Rozvrh() {
   const [table, setTable] = useState<string>("");
+  const [isLoaded, setLoaded] = useState<boolean>(false);
 
   const load = async () => {
     const res = await fetch(
@@ -33,6 +35,8 @@ export default function Rozvrh() {
         credentials: "include",
       }
     );
+    if (!res.ok) return <p>Failed to load</p>;
+    setLoaded(true);
     const html = await res.text();
 
     const dom = new DOMParser().parseFromString(html, "text/html");
@@ -56,8 +60,10 @@ export default function Rozvrh() {
   }, []);
 
   return (
-    <div
-      className="
+    <>
+      {isLoaded ? (
+        <div
+          className="
       w-full border-separate [&_table]:border-separate text-sm
       [&_td.DctInnerTableType10DataTD]:bg-neutral-800/25 
       [&_td.DctInnerTableType10DataTD,td.KuvSkolniAkceHodina,td.KuvOUOstatni,td.KuvOUKrouzek,td.KuvSuplujiciHodina,td.KuvSuplovanaHodina]:p-1
@@ -82,7 +88,13 @@ export default function Rozvrh() {
       [&_th]:outline-[#1B1B1B]
       [&_td.KuvHeaderNadpis,td.KuvHeaderText]:bg-transparent
       "
-      dangerouslySetInnerHTML={{ __html: table }}
-    />
+          dangerouslySetInnerHTML={{ __html: table }}
+        />
+      ) : (
+        <div className="flex min-h-screen justify-center items-center">
+          <Spinner />
+        </div>
+      )}
+    </>
   );
 }
